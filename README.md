@@ -30,19 +30,28 @@ Integrate the Productboard API into agentic workflows via MCP
 ### Access Token
 Obtain your access token referring to [this guidance](https://developer.productboard.com/reference/authentication#public-api-access-token)
 
-### Usage with Claude Desktop
-To use this with Claude Desktop, add the following to your `claude_desktop_config.json`:
+### Build
 
-### NPX
+This server is run locally from source — it is not published to the npm registry, so `npx productboard-mcp` will not work. Clone the repository and build it first:
+
+```bash
+git clone https://github.com/kenjihikmatullah/productboard-mcp
+cd productboard-mcp
+npm install
+```
+
+This compiles TypeScript to `build/index.js`.
+
+### Usage with Claude Desktop
+To use this with Claude Desktop, add the following to your `claude_desktop_config.json`, pointing `args` at the absolute path to `build/index.js` in your local checkout:
 
 ```json
 {
   "mcpServers": {
     "productboard": {
-      "command": "npx",
+      "command": "node",
       "args": [
-        "-y",
-        "productboard-mcp"
+        "/absolute/path/to/productboard-mcp/build/index.js"
       ],
       "env": {
         "PRODUCTBOARD_ACCESS_TOKEN": "<YOUR_TOKEN>"
