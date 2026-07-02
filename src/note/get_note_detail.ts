@@ -21,7 +21,7 @@ interface GetNoteDetailRequest {
 }
 
 const getNoteDetail = async (request: GetNoteDetailRequest): Promise<any> => {
-    const endpoint = `/notes/${request.noteId}`
+    const endpoint = `/notes/${encodeURIComponent(request.noteId)}`
     return productboardClient.get(endpoint)
 }
 

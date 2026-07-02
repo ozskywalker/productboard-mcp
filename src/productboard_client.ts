@@ -14,10 +14,30 @@ class ProductboardClient {
     }
 
     async get(endpoint: string) {
-        const response = await fetch(`${this.baseUrl}${endpoint}`, {
-            method: "GET",
-            headers: this.headers,
-        });
+        const controller = new AbortController()
+        const timeout = setTimeout(() => controller.abort(), 30_000)
+
+        let response: Response
+        try {
+            response = await fetch(`${this.baseUrl}${endpoint}`, {
+                method: "GET",
+                headers: this.headers,
+                signal: controller.signal,
+            })
+        } catch (err) {
+            if ((err as Error).name === "AbortError") {
+                throw new Error(`Request timed out after 30s: ${endpoint}`)
+            }
+            throw err
+        } finally {
+            clearTimeout(timeout)
+        }
+
+        if (!response.ok) {
+            const body = await response.text()
+            throw new Error(`Productboard API error ${response.status}: ${body}`)
+        }
+
         return response.json()
     }
 }

@@ -5,16 +5,24 @@ Integrate the Productboard API into agentic workflows via MCP
 
 ## Tools
 
-1. `get_companies`
-2. `get_company_detail`
-3. `get_components`
-4. `get_component_detail`
-5. `get_features`
-6. `get_feature_detail`
-7. `get_feature_statuses`
-8. `get_notes`
-9. `get_products`
-10. `get_product_detail`
+| Tool | Description |
+|---|---|
+| `get_companies` | List all companies (paginated) |
+| `get_company_detail` | Get a specific company by ID |
+| `get_components` | List all components (paginated) |
+| `get_component_detail` | Get a specific component by ID |
+| `get_features` | List all features (paginated) |
+| `get_feature_detail` | Get a specific feature by ID |
+| `get_feature_statuses` | List all feature statuses |
+| `get_notes` | List all notes (paginated) |
+| `get_note_detail` | Get a specific note by ID |
+| `get_products` | List all products (paginated) |
+| `get_product_detail` | Get a specific product by ID |
+| `get_initiatives` | List all initiatives (paginated) |
+| `get_initiative_detail` | Get a specific initiative by ID |
+| `get_initiative_features` | List features linked to an initiative (paginated) |
+| `get_objectives` | List all objectives (paginated) |
+| `get_objective_detail` | Get a specific objective by ID |
 
 
 ## Setup

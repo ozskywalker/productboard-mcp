@@ -17,6 +17,11 @@ import { getNotesTool, GetNotesRequest, getNotes } from "./note/get_notes.js";
 import { getNoteDetailTool, GetNoteDetailRequest, getNoteDetail } from "./note/get_note_detail.js";
 import { getCompaniesTool, GetCompaniesRequest, getCompanies } from "./company/get_companies.js";
 import { getCompanyDetailTool, GetCompanyDetailRequest, getCompanyDetail } from "./company/get_company_detail.js";
+import { getInitiativesTool, GetInitiativesRequest, getInitiatives } from "./initiative/get_initiatives.js";
+import { getInitiativeDetailTool, GetInitiativeDetailRequest, getInitiativeDetail } from "./initiative/get_initiative_detail.js";
+import { getInitiativeFeaturesTool, GetInitiativeFeaturesRequest, getInitiativeFeatures } from "./initiative/get_initiative_features.js";
+import { getObjectivesTool, GetObjectivesRequest, getObjectives } from "./objective/get_objectives.js";
+import { getObjectiveDetailTool, GetObjectiveDetailRequest, getObjectiveDetail } from "./objective/get_objective_detail.js";
 
 async function main() {
     const productboardAccessToken = process.env.PRODUCTBOARD_ACCESS_TOKEN
@@ -41,7 +46,7 @@ async function main() {
     server.setRequestHandler(
         CallToolRequestSchema,
         async (request: CallToolRequest) => {
-            console.info("Received CallToolRequest: ", request);
+            console.error(`Received CallToolRequest for tool: ${request.params.name}`);
 
             try {
                 const { name, arguments: args } = request.params
@@ -135,6 +140,46 @@ async function main() {
                         }
                     }
 
+                    case getInitiativesTool.name: {
+                        const request = args as unknown as GetInitiativesRequest;
+                        const result = await getInitiatives(request);
+                        return {
+                            content: [{ type: "text", text: JSON.stringify(result) }],
+                        }
+                    }
+
+                    case getInitiativeDetailTool.name: {
+                        const request = args as unknown as GetInitiativeDetailRequest;
+                        const result = await getInitiativeDetail(request);
+                        return {
+                            content: [{ type: "text", text: JSON.stringify(result) }],
+                        }
+                    }
+
+                    case getInitiativeFeaturesTool.name: {
+                        const request = args as unknown as GetInitiativeFeaturesRequest;
+                        const result = await getInitiativeFeatures(request);
+                        return {
+                            content: [{ type: "text", text: JSON.stringify(result) }],
+                        }
+                    }
+
+                    case getObjectivesTool.name: {
+                        const request = args as unknown as GetObjectivesRequest;
+                        const result = await getObjectives(request);
+                        return {
+                            content: [{ type: "text", text: JSON.stringify(result) }],
+                        }
+                    }
+
+                    case getObjectiveDetailTool.name: {
+                        const request = args as unknown as GetObjectiveDetailRequest;
+                        const result = await getObjectiveDetail(request);
+                        return {
+                            content: [{ type: "text", text: JSON.stringify(result) }],
+                        }
+                    }
+
                     default:
                         throw new Error(`Unknown tool: ${name}`);
                 }
@@ -156,7 +201,7 @@ async function main() {
     )
 
     server.setRequestHandler(ListToolsRequestSchema, async () => {
-        console.info("Received ListToolsRequest");
+        console.error("Received ListToolsRequest");
         return {
             tools: [
                 getProductsTool,
@@ -169,16 +214,21 @@ async function main() {
                 getNotesTool,
                 getNoteDetailTool,
                 getCompaniesTool,
-                getCompanyDetailTool
+                getCompanyDetailTool,
+                getInitiativesTool,
+                getInitiativeDetailTool,
+                getInitiativeFeaturesTool,
+                getObjectivesTool,
+                getObjectiveDetailTool,
             ],
         };
     });
 
     const transport = new StdioServerTransport();
-    console.log("Connecting server to transport...");
+    console.error("Connecting server to transport...");
     await server.connect(transport);
 
-    console.log("Productboard MCP Server running on stdio");
+    console.error("Productboard MCP Server running on stdio");
 }
 
 main().catch((error) => {

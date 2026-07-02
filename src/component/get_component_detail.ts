@@ -21,7 +21,7 @@ interface GetComponentDetailRequest {
 }
 
 const getComponentDetail = async (request: GetComponentDetailRequest): Promise<any> => {
-    const endpoint = `/components/${request.componentId}`
+    const endpoint = `/components/${encodeURIComponent(request.componentId)}`
     return productboardClient.get(endpoint)
 }
 

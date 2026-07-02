@@ -21,7 +21,7 @@ interface GetProductDetailRequest {
 }
 
 const getProductDetail = async (request: GetProductDetailRequest): Promise<any> => {
-    const endpoint = `/products/${request.productId}`
+    const endpoint = `/products/${encodeURIComponent(request.productId)}`
     return productboardClient.get(endpoint)
 }
 

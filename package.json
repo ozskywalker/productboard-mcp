@@ -11,7 +11,7 @@
   },
   "type": "module",
   "bin": {
-    "notion": "./build/index.js"
+    "productboard-mcp": "./build/index.js"
   },
   "files": [
     "build"
@@ -20,6 +20,7 @@
     "build": "tsc && node -e \"require('fs').chmodSync('build/index.js', '755')\"",
     "prepare": "npm run build",
     "watch": "tsc --watch",
+    "test": "vitest run",
     "inspector": "npx @modelcontextprotocol/inspector build/index.js"
   },
   "keywords": [
@@ -33,6 +34,7 @@
   },
   "devDependencies": {
     "@types/node": "^22.13.5",
-    "typescript": "^5.7.3"
+    "typescript": "^5.7.3",
+    "vitest": "^4.1.9"
   }
 }
