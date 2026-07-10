@@ -195,6 +195,7 @@ async function main() {
                             }),
                         },
                     ],
+                    isError: true,
                 };
             }
         }
