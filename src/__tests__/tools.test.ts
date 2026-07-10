@@ -293,6 +293,75 @@ describe("getInitiativeFeatures", () => {
             "/entities/a%2Fb/relationships?type=link&target[type]=feature"
         )
     })
+
+    it("expand=false (default) returns link stubs unchanged", async () => {
+        const stub = { data: [{ type: "link", target: { id: "f1", type: "feature" } }], links: { next: null } }
+        mockGet.mockResolvedValueOnce(stub)
+
+        const result = await getInitiativeFeatures({ initiativeId: "init-5" })
+
+        expect(mockGet).toHaveBeenCalledTimes(1)
+        expect(result).toEqual(stub)
+    })
+
+    it("expand=true resolves each link stub into full feature detail", async () => {
+        mockGet.mockResolvedValueOnce({
+            data: [
+                { type: "link", target: { id: "f1", type: "feature" } },
+                { type: "link", target: { id: "f2", type: "feature" } },
+            ],
+            links: { next: null },
+        })
+        mockGet.mockResolvedValueOnce({ data: { id: "f1", type: "feature", fields: { name: "Foo" } } })
+        mockGet.mockResolvedValueOnce({ data: { id: "f2", type: "feature", fields: { name: "Bar" } } })
+
+        const result = await getInitiativeFeatures({ initiativeId: "init-5", expand: true })
+
+        expect(mockGet).toHaveBeenNthCalledWith(
+            1,
+            "/entities/init-5/relationships?type=link&target[type]=feature"
+        )
+        expect(mockGet).toHaveBeenNthCalledWith(2, "/entities/f1")
+        expect(mockGet).toHaveBeenNthCalledWith(3, "/entities/f2")
+        expect(result).toEqual({
+            data: [
+                { id: "f1", type: "feature", fields: { name: "Foo" } },
+                { id: "f2", type: "feature", fields: { name: "Bar" } },
+            ],
+            links: { next: null },
+        })
+    })
+
+    it("expand=true passes fields[] through to each detail lookup", async () => {
+        mockGet.mockResolvedValueOnce({
+            data: [{ type: "link", target: { id: "f1", type: "feature" } }],
+            links: { next: null },
+        })
+        mockGet.mockResolvedValueOnce({ data: { id: "f1" } })
+
+        await getInitiativeFeatures({ initiativeId: "init-5", expand: true, fields: ["name", "status"] })
+
+        expect(mockGet).toHaveBeenNthCalledWith(2, "/entities/f1?fields[]=name&fields[]=status")
+    })
+
+    it("expand=true returns an error stub for a feature that fails to resolve, without failing the whole call", async () => {
+        mockGet.mockResolvedValueOnce({
+            data: [
+                { type: "link", target: { id: "f1", type: "feature" } },
+                { type: "link", target: { id: "f2", type: "feature" } },
+            ],
+            links: { next: null },
+        })
+        mockGet.mockResolvedValueOnce({ data: { id: "f1" } })
+        mockGet.mockRejectedValueOnce(new Error("Productboard API error 404: not found"))
+
+        const result = await getInitiativeFeatures({ initiativeId: "init-5", expand: true })
+
+        expect(result.data).toEqual([
+            { id: "f1" },
+            { id: "f2", type: "feature", error: "Productboard API error 404: not found" },
+        ])
+    })
 })
 
 describe("getObjectiveDetail", () => {
