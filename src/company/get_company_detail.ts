@@ -1,5 +1,6 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
+import { fieldsQueryString } from "../fields.js";
 
 const getCompanyDetailTool: Tool = {
     "name": "get_company_detail",
@@ -10,6 +11,11 @@ const getCompanyDetailTool: Tool = {
             "companyId": {
                 "type": "string",
                 "description": "ID of the company to retrieve"
+            },
+            "fields": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Return only these fields to reduce response size (e.g. [\"name\", \"status\"]). Pass [\"all\"] to include fields that are otherwise omitted when empty"
             }
         },
         "required": ["companyId"]
@@ -18,10 +24,16 @@ const getCompanyDetailTool: Tool = {
 
 interface GetCompanyDetailRequest {
     companyId: string
+    fields?: string[]
 }
 
 const getCompanyDetail = async (request: GetCompanyDetailRequest): Promise<any> => {
-    const endpoint = `/entities/${encodeURIComponent(request.companyId)}`
+    let endpoint = `/entities/${encodeURIComponent(request.companyId)}`
+    const fieldsParam = fieldsQueryString(request.fields)
+    if (fieldsParam) {
+        endpoint += `?${fieldsParam}`
+    }
+
     return productboardClient.get(endpoint)
 }
 

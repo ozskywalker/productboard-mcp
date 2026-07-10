@@ -27,7 +27,8 @@ This server uses [Productboard's Public API v2](https://developer.productboard.c
 
 ### Notes on the v1 → v2 migration
 
-- **Pagination is cursor-based**, not page-number based. Pass the `pageCursor` from a response's `links.next` to fetch the next page — there's no `page` parameter anymore.
+- **Pagination is cursor-based**, not page-number based. Pass the `pageCursor` from a response's `links.next` to fetch the next page — there's no `page` parameter anymore. `pageCursor` accepts either the bare cursor token or the full `links.next` URL.
+- **Sparse fieldsets**: list and detail tools accept an optional `fields` array (e.g. `["name", "status"]`, or `["all"]` for everything) to trim large entity payloads — features in particular carry a nested `relationships` block that most callers don't need.
 - **`get_initiative_features`** returns link stubs (`id`/`type`/`links`) rather than full feature objects, since v2's relationship endpoint doesn't expand targets. Follow up with `get_feature_detail` per ID for full data.
 - **`get_notes`** filtering is narrower in v2: the v1 `term` (full-text search), `featureId`, `companyId`, `anyTag`/`allTags`, and `last` filters have no v2 equivalent and are no longer supported.
 

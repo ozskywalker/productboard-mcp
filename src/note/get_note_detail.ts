@@ -1,5 +1,6 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
+import { fieldsQueryString } from "../fields.js";
 
 const getNoteDetailTool: Tool = {
     "name": "get_note_detail",
@@ -10,6 +11,11 @@ const getNoteDetailTool: Tool = {
             "noteId": {
                 "type": "string",
                 "description": "ID of the note to retrieve"
+            },
+            "fields": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Return only these fields to reduce response size (e.g. [\"name\", \"tags\"]). Pass [\"all\"] to include fields that are otherwise omitted when empty"
             }
         },
         "required": ["noteId"]
@@ -18,10 +24,16 @@ const getNoteDetailTool: Tool = {
 
 interface GetNoteDetailRequest {
     noteId: string
+    fields?: string[]
 }
 
 const getNoteDetail = async (request: GetNoteDetailRequest): Promise<any> => {
-    const endpoint = `/notes/${encodeURIComponent(request.noteId)}`
+    let endpoint = `/notes/${encodeURIComponent(request.noteId)}`
+    const fieldsParam = fieldsQueryString(request.fields)
+    if (fieldsParam) {
+        endpoint += `?${fieldsParam}`
+    }
+
     return productboardClient.get(endpoint)
 }
 

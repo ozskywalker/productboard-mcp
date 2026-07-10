@@ -1,6 +1,7 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
 import { resolvePageCursor } from "../pagination.js";
+import { appendFields } from "../fields.js";
 
 const getNotesTool: Tool = {
     "name": "get_notes",
@@ -57,6 +58,11 @@ const getNotesTool: Tool = {
                 "type": "string",
                 "description": "Return only notes with a specific source record ID"
             },
+            "fields": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Return only these fields to reduce response size (e.g. [\"name\", \"tags\"]). Pass [\"all\"] to include fields that are otherwise omitted when empty"
+            },
             "pageCursor": {
                 "type": "string",
                 "description": "Cursor for the next page of results — pass either the bare cursor token or the full links.next URL from the previous response"
@@ -77,6 +83,7 @@ interface GetNotesRequest {
     creatorEmail?: string;
     sourceSystem?: string;
     sourceRecordId?: string;
+    fields?: string[];
     pageCursor?: string;
 }
 
@@ -116,6 +123,7 @@ const getNotes = async (request: GetNotesRequest): Promise<any> => {
     if (request.sourceRecordId) {
         params.append('metadata[source][recordId]', request.sourceRecordId)
     }
+    appendFields(params, request.fields)
     const pageCursor = resolvePageCursor(request.pageCursor)
     if (pageCursor) {
         params.append('pageCursor', pageCursor)

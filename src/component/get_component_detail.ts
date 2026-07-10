@@ -1,5 +1,6 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
+import { fieldsQueryString } from "../fields.js";
 
 const getComponentDetailTool: Tool = {
     "name": "get_component_detail",
@@ -10,6 +11,11 @@ const getComponentDetailTool: Tool = {
             "componentId": {
                 "type": "string",
                 "description": "ID of the component to retrieve"
+            },
+            "fields": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Return only these fields to reduce response size (e.g. [\"name\", \"status\"]). Pass [\"all\"] to include fields that are otherwise omitted when empty"
             }
         },
         "required": ["componentId"]
@@ -18,10 +24,16 @@ const getComponentDetailTool: Tool = {
 
 interface GetComponentDetailRequest {
     componentId: string
+    fields?: string[]
 }
 
 const getComponentDetail = async (request: GetComponentDetailRequest): Promise<any> => {
-    const endpoint = `/entities/${encodeURIComponent(request.componentId)}`
+    let endpoint = `/entities/${encodeURIComponent(request.componentId)}`
+    const fieldsParam = fieldsQueryString(request.fields)
+    if (fieldsParam) {
+        endpoint += `?${fieldsParam}`
+    }
+
     return productboardClient.get(endpoint)
 }
 

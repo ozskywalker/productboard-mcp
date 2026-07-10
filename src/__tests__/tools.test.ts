@@ -45,6 +45,20 @@ describe("getFeatures", () => {
         await getFeatures({ pageCursor: "cursor-1" })
         expect(mockGet).toHaveBeenCalledWith("/entities?type[]=feature&pageCursor=cursor-1")
     })
+
+    it("resolves a full links.next URL down to its bare cursor token", async () => {
+        await getFeatures({
+            pageCursor: "https://api.productboard.com/v2/entities?type[]=feature&pageCursor=cursor-1",
+        })
+        expect(mockGet).toHaveBeenCalledWith("/entities?type[]=feature&pageCursor=cursor-1")
+    })
+
+    it("appends fields[] when provided", async () => {
+        await getFeatures({ fields: ["name", "status"] })
+        expect(mockGet).toHaveBeenCalledWith(
+            "/entities?type[]=feature&fields[]=name&fields[]=status"
+        )
+    })
 })
 
 describe("getCompanies", () => {
@@ -171,6 +185,11 @@ describe("getNotes", () => {
         expect(call).toContain("type%5B%5D=textNote")
         expect(call).toContain("owner%5Bemail%5D=a%40example.com")
     })
+
+    it("appends fields[] when provided", async () => {
+        await getNotes({ fields: ["name", "tags"] })
+        expect(mockGet).toHaveBeenCalledWith("/notes?fields%5B%5D=name&fields%5B%5D=tags")
+    })
 })
 
 // ---------------------------------------------------------------------------
@@ -180,6 +199,11 @@ describe("getFeatureDetail", () => {
     it("calls /entities/:id", async () => {
         await getFeatureDetail({ featureId: "abc-123" })
         expect(mockGet).toHaveBeenCalledWith("/entities/abc-123")
+    })
+
+    it("appends fields[] when provided", async () => {
+        await getFeatureDetail({ featureId: "abc-123", fields: ["name", "status"] })
+        expect(mockGet).toHaveBeenCalledWith("/entities/abc-123?fields[]=name&fields[]=status")
     })
 
     it("encodes special characters in featureId", async () => {
