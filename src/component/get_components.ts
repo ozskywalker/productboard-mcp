@@ -3,26 +3,26 @@ import productboardClient from "../productboard_client.js";
 
 const getComponentsTool: Tool = {
     "name": "get_components",
-    "description": "Returns a list of all components. This API is paginated and the page limit is always 100",
+    "description": "Returns a list of all components. This API uses cursor-based pagination",
     "inputSchema": {
         "type": "object",
         "properties": {
-            "page": {
-                "type": "number",
-                "default": 1
+            "pageCursor": {
+                "type": "string",
+                "description": "Cursor for the next page of results, taken from the previous response's links.next"
             }
         }
     }
 }
 
 interface GetComponentsRequest {
-    page?: number
+    pageCursor?: string
 }
 
 const getComponents = async (request: GetComponentsRequest): Promise<any> => {
-    let endpoint = "/components"
-    if (request.page && request.page > 1) {
-        endpoint += `?pageOffset=${(request.page - 1) * 100}`
+    let endpoint = "/entities?type[]=component"
+    if (request.pageCursor) {
+        endpoint += `&pageCursor=${encodeURIComponent(request.pageCursor)}`
     }
 
     return productboardClient.get(endpoint)

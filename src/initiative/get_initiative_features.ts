@@ -3,7 +3,7 @@ import productboardClient from "../productboard_client.js";
 
 const getInitiativeFeaturesTool: Tool = {
     "name": "get_initiative_features",
-    "description": "Returns all features linked to a specific initiative",
+    "description": "Returns the features linked to a specific initiative. This API uses cursor-based pagination. Note: v2 has no expand support on this endpoint, so results are link stubs ({id, type, links}) rather than full feature objects — pass each id to get_feature_detail for full data",
     "inputSchema": {
         "type": "object",
         "properties": {
@@ -11,9 +11,9 @@ const getInitiativeFeaturesTool: Tool = {
                 "type": "string",
                 "description": "ID of the initiative whose features to retrieve"
             },
-            "page": {
-                "type": "number",
-                "default": 1
+            "pageCursor": {
+                "type": "string",
+                "description": "Cursor for the next page of results, taken from the previous response's links.next"
             }
         },
         "required": ["initiativeId"]
@@ -22,13 +22,13 @@ const getInitiativeFeaturesTool: Tool = {
 
 interface GetInitiativeFeaturesRequest {
     initiativeId: string
-    page?: number
+    pageCursor?: string
 }
 
 const getInitiativeFeatures = async (request: GetInitiativeFeaturesRequest): Promise<any> => {
-    let endpoint = `/initiatives/${encodeURIComponent(request.initiativeId)}/features`
-    if (request.page && request.page > 1) {
-        endpoint += `?pageOffset=${(request.page - 1) * 100}`
+    let endpoint = `/entities/${encodeURIComponent(request.initiativeId)}/relationships?type=link&target[type]=feature`
+    if (request.pageCursor) {
+        endpoint += `&pageCursor=${encodeURIComponent(request.pageCursor)}`
     }
 
     return productboardClient.get(endpoint)

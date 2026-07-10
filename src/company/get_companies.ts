@@ -3,26 +3,26 @@ import productboardClient from "../productboard_client.js";
 
 const getCompaniesTool: Tool = {
     "name": "get_companies",
-    "description": "Returns a list of all companies. This API is paginated and the page limit is always 100",
+    "description": "Returns a list of all companies. This API uses cursor-based pagination",
     "inputSchema": {
         "type": "object",
         "properties": {
-            "page": {
-                "type": "number",
-                "default": 1
+            "pageCursor": {
+                "type": "string",
+                "description": "Cursor for the next page of results, taken from the previous response's links.next"
             }
         }
     }
 }
 
 interface GetCompaniesRequest {
-    page?: number
+    pageCursor?: string
 }
 
 const getCompanies = async (request: GetCompaniesRequest): Promise<any> => {
-    let endpoint = "/companies"
-    if (request.page && request.page > 1) {
-        endpoint += `?pageOffset=${(request.page - 1) * 100}`
+    let endpoint = "/entities?type[]=company"
+    if (request.pageCursor) {
+        endpoint += `&pageCursor=${encodeURIComponent(request.pageCursor)}`
     }
 
     return productboardClient.get(endpoint)

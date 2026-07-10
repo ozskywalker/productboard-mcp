@@ -21,7 +21,7 @@ interface GetInitiativeDetailRequest {
 }
 
 const getInitiativeDetail = async (request: GetInitiativeDetailRequest): Promise<any> => {
-    const endpoint = `/initiatives/${encodeURIComponent(request.initiativeId)}`
+    const endpoint = `/entities/${encodeURIComponent(request.initiativeId)}`
     return productboardClient.get(endpoint)
 }
 

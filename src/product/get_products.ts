@@ -3,26 +3,26 @@ import productboardClient from "../productboard_client.js";
 
 const getProductsTool: Tool = {
     "name": "get_products",
-    "description": "Returns detail of all products. This API is paginated and the page limit is always 100",
+    "description": "Returns detail of all products. This API uses cursor-based pagination",
     "inputSchema": {
         "type": "object",
         "properties": {
-            "page": {
-                "type": "number",
-                "default": 1
+            "pageCursor": {
+                "type": "string",
+                "description": "Cursor for the next page of results, taken from the previous response's links.next"
             }
         }
     }
 }
 
 interface GetProductsRequest {
-    page?: number
+    pageCursor?: string
 }
 
 const getProducts = async (request: GetProductsRequest): Promise<any> => {
-    let endpoint = "/products"
-    if (request.page && request.page > 1) {
-        endpoint += `?pageOffset=${(request.page - 1) * 100}`
+    let endpoint = "/entities?type[]=product"
+    if (request.pageCursor) {
+        endpoint += `&pageCursor=${encodeURIComponent(request.pageCursor)}`
     }
 
     return productboardClient.get(endpoint)

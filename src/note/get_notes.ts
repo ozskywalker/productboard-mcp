@@ -3,104 +3,93 @@ import productboardClient from "../productboard_client.js";
 
 const getNotesTool: Tool = {
     "name": "get_notes",
-    "description": "Returns a list of all notes",
+    "description": "Returns a list of all notes. This API uses cursor-based pagination. Note: the v1 'term' (full-text search), 'featureId', 'companyId', 'anyTag'/'allTags', and 'last' filters have no v2 equivalent and are not supported",
     "inputSchema": {
         "type": "object",
         "properties": {
-            "last": {
+            "type": {
                 "type": "string",
-                "description": "Return only notes created since given span of months (m), days (s), or hours (h). E.g. 6m | 10d | 24h | 1h. Cannot be combined with createdFrom, createdTo, dateFrom, or dateTo"
+                "enum": ["textNote", "conversationNote", "opportunityNote"],
+                "description": "Return only notes of this type"
+            },
+            "archived": {
+                "type": "boolean",
+                "description": "Return only notes with this archived status"
+            },
+            "processed": {
+                "type": "boolean",
+                "description": "Return only notes with this processed status"
             },
             "createdFrom": {
                 "type": "string",
-                "format": "date",
-                "description": "Return only notes created since given date. Cannot be combined with last"
+                "format": "date-time",
+                "description": "Return only notes created on or after this date-time"
             },
             "createdTo": {
                 "type": "string",
-                "format": "date",
-                "description": "Return only notes created before or equal to the given date. Cannot be combined with last"
+                "format": "date-time",
+                "description": "Return only notes created on or before this date-time"
             },
             "updatedFrom": {
                 "type": "string",
-                "format": "date",
-                "description": "Return only notes updated since given date"
+                "format": "date-time",
+                "description": "Return only notes updated on or after this date-time"
             },
             "updatedTo": {
                 "type": "string",
-                "format": "date",
-                "description": "Return only notes updated before or equal to the given date"
-            },
-            "term": {
-                "type": "string",
-                "description": "Return only notes by fulltext search"
-            },
-            "featureId": {
-                "type": "string",
-                "description": "Return only notes for specific feature ID or its descendants"
-            },
-            "companyId": {
-                "type": "string",
-                "description": "Return only notes for specific company ID"
+                "format": "date-time",
+                "description": "Return only notes updated on or before this date-time"
             },
             "ownerEmail": {
                 "type": "string",
                 "description": "Return only notes owned by a specific owner email"
             },
-            "source": {
+            "creatorEmail": {
                 "type": "string",
-                "description": "Return only notes from a specific source origin. This is the unique string identifying the external system from which the data came"
+                "description": "Return only notes created by a specific creator email"
             },
-            "anyTag": {
+            "sourceSystem": {
                 "type": "string",
-                "description": "Return only notes that have been assigned any of the tags in the array. Cannot be combined with allTags"
+                "description": "Return only notes from a specific source system"
             },
-            "allTags": {
+            "sourceRecordId": {
                 "type": "string",
-                "description": "Return only notes that have been assigned all of the tags in the array. Cannot be combined with anyTag"
-            },
-            "pageLimit": {
-                "type": "number",
-                "description": "Page limit"
+                "description": "Return only notes with a specific source record ID"
             },
             "pageCursor": {
                 "type": "string",
-                "description": "Page cursor to get next page of results"
+                "description": "Cursor for the next page of results, taken from the previous response's links.next"
             }
         }
     }
 }
 
 interface GetNotesRequest {
-    last?: string;
+    type?: string;
+    archived?: boolean;
+    processed?: boolean;
     createdFrom?: string;
     createdTo?: string;
     updatedFrom?: string;
     updatedTo?: string;
-    term?: string;
-    featureId?: string;
-    companyId?: string;
     ownerEmail?: string;
-    source?: string;
-    anyTag?: string;
-    allTags?: string;
-    pageLimit?: number;
+    creatorEmail?: string;
+    sourceSystem?: string;
+    sourceRecordId?: string;
     pageCursor?: string;
 }
 
 const getNotes = async (request: GetNotesRequest): Promise<any> => {
-    // Validate mutually exclusive parameters
-    if (request.last && (request.createdFrom || request.createdTo)) {
-        throw new Error("'last' parameter cannot be combined with 'createdFrom' or 'createdTo'");
-    }
-    if (request.anyTag && request.allTags) {
-        throw new Error("'anyTag' cannot be combined with 'allTags'");
-    }
-
     const params = new URLSearchParams()
-    
-    if (request.last) {
-        params.append('last', request.last)
+
+    if (request.type) {
+        params.append('type[]', request.type)
+    }
+    if (request.archived !== undefined) {
+        params.append('archived', String(request.archived))
+    }
+    if (request.processed !== undefined) {
+        params.append('processed', String(request.processed))
     }
     if (request.createdFrom) {
         params.append('createdFrom', request.createdFrom)
@@ -114,29 +103,17 @@ const getNotes = async (request: GetNotesRequest): Promise<any> => {
     if (request.updatedTo) {
         params.append('updatedTo', request.updatedTo)
     }
-    if (request.term) {
-        params.append('term', request.term)
-    }
-    if (request.featureId) {
-        params.append('featureId', request.featureId)
-    }
-    if (request.companyId) {
-        params.append('companyId', request.companyId)
-    }
     if (request.ownerEmail) {
-        params.append('ownerEmail', request.ownerEmail)
+        params.append('owner[email]', request.ownerEmail)
     }
-    if (request.source) {
-        params.append('source', request.source)
+    if (request.creatorEmail) {
+        params.append('creator[email]', request.creatorEmail)
     }
-    if (request.anyTag) {
-        params.append('anyTag', request.anyTag)
+    if (request.sourceSystem) {
+        params.append('metadata[source][system]', request.sourceSystem)
     }
-    if (request.allTags) {
-        params.append('allTags', request.allTags)
-    }
-    if (request.pageLimit) {
-        params.append('pageLimit', request.pageLimit.toString())
+    if (request.sourceRecordId) {
+        params.append('metadata[source][recordId]', request.sourceRecordId)
     }
     if (request.pageCursor) {
         params.append('pageCursor', request.pageCursor)

@@ -40,10 +40,12 @@ Example structure in `src/feature/get_features.ts`:
 ### API Client Architecture
 The `ProductboardClient` class (`src/productboard_client.ts`) provides:
 - Bearer token authentication
-- Standard headers including API version
-- Base URL configuration
+- Base URL configuration, pointed at Productboard's Public API **v2** (`https://api.productboard.com/v2`) — v1 was sunset 2026-07-08
 - GET request wrapper with 30s timeout and HTTP error handling (throws on non-2xx)
 - All URL path parameters are `encodeURIComponent`-encoded before use
+
+### v2 Entity Model
+v2 replaced the separate v1 `/products`, `/components`, `/features`, `/initiatives`, `/objectives`, and `/companies` resources with a single unified `/entities` resource, disambiguated by a `type[]` filter (e.g. `/entities?type[]=feature`). Detail lookups for all of these go through `/entities/{id}`. `get_feature_statuses` has no direct v2 equivalent — it looks up the workspace's `status` field id via `/entities/configurations/feature`, then lists that field's allowed values via `/entities/fields/{fieldId}/values`. `get_initiative_features` uses `/entities/{id}/relationships?type=link&target[type]=feature`, which returns link stubs (id/type/links) rather than full feature objects — callers should follow up with `get_feature_detail` per id. `/notes` remains a standalone resource in v2, but the v1 `term`, `featureId`, `companyId`, `anyTag`/`allTags`, and `last` filters have no v2 equivalent and were dropped.
 
 ### Tool Registration
 All tools are registered in `src/index.ts` in two places:
@@ -60,8 +62,9 @@ All tools are registered in `src/index.ts` in two places:
 - `get_initiatives` / `get_initiative_detail` / `get_initiative_features` - Initiative management
 - `get_objectives` / `get_objective_detail` - Objective management
 
-### Pagination
-List endpoints support pagination with `page` parameter. The API uses `pageOffset` calculation: `(page - 1) * 100` for page sizes of 100.
+## Pagination
+
+List endpoints use cursor-based pagination: an optional `pageCursor` parameter takes the value from the previous response's `links.next`. There is no page-number/offset pagination in v2.
 
 ## Testing
 

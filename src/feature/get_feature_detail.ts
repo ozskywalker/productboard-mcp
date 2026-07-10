@@ -21,7 +21,7 @@ interface GetFeatureDetailRequest {
 }
 
 const getFeatureDetail = async (request: GetFeatureDetailRequest): Promise<any> => {
-    const endpoint = `/features/${encodeURIComponent(request.featureId)}`
+    const endpoint = `/entities/${encodeURIComponent(request.featureId)}`
     return productboardClient.get(endpoint)
 }
 

@@ -32,7 +32,7 @@ describe("ProductboardClient", () => {
         })
     })
 
-    it("includes X-Version and Content-Type headers", async () => {
+    it("includes Content-Type header", async () => {
         const mockFetch = makeFetch(200, {})
         vi.stubGlobal("fetch", mockFetch)
 
@@ -40,19 +40,18 @@ describe("ProductboardClient", () => {
 
         const [, init] = (mockFetch as ReturnType<typeof vi.fn>).mock.calls[0]
         expect((init as RequestInit).headers).toMatchObject({
-            "X-Version": "1",
             "Content-Type": "application/json",
         })
     })
 
-    it("constructs the full URL from base + endpoint", async () => {
+    it("constructs the full URL from the v2 base + endpoint", async () => {
         const mockFetch = makeFetch(200, {})
         vi.stubGlobal("fetch", mockFetch)
 
         await productboardClient.get("/features")
 
         const [url] = (mockFetch as ReturnType<typeof vi.fn>).mock.calls[0]
-        expect(url).toBe("https://api.productboard.com/features")
+        expect(url).toBe("https://api.productboard.com/v2/features")
     })
 
     it("returns parsed JSON on success", async () => {

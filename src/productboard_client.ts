@@ -1,6 +1,6 @@
 class ProductboardClient {
     private accessToken: string
-    private baseUrl = "https://api.productboard.com"
+    private baseUrl = "https://api.productboard.com/v2"
     private headers: { [key: string]: string };
 
     constructor(accessToken: string) {
@@ -9,7 +9,6 @@ class ProductboardClient {
             Authorization: `Bearer ${this.accessToken}`,
             "Content-Type": "application/json",
             "Accept": "application/json",
-            "X-Version": "1",
         };
     }
 

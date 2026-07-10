@@ -32,99 +32,127 @@ beforeEach(() => {
 })
 
 // ---------------------------------------------------------------------------
-// List tools — endpoint & pagination
-// Finding #2: split into separate it cases per page value
-// Finding #8: include page=undefined and page=1 as distinct cases
+// List tools — entity type filter & cursor pagination
 // ---------------------------------------------------------------------------
 
 describe("getFeatures", () => {
-    it.each([
-        [undefined, "/features"],
-        [1,         "/features"],
-        [2,         "/features?pageOffset=100"],
-        [3,         "/features?pageOffset=200"],
-    ] as [number | undefined, string][])("page=%s → %s", async (page, expected) => {
-        await getFeatures({ page })
-        expect(mockGet).toHaveBeenCalledWith(expected)
+    it("calls /entities filtered by type=feature", async () => {
+        await getFeatures({})
+        expect(mockGet).toHaveBeenCalledWith("/entities?type[]=feature")
+    })
+
+    it("appends pageCursor when provided", async () => {
+        await getFeatures({ pageCursor: "cursor-1" })
+        expect(mockGet).toHaveBeenCalledWith("/entities?type[]=feature&pageCursor=cursor-1")
     })
 })
 
 describe("getCompanies", () => {
-    it.each([
-        [undefined, "/companies"],
-        [1,         "/companies"],
-        [2,         "/companies?pageOffset=100"],
-        [3,         "/companies?pageOffset=200"],
-    ] as [number | undefined, string][])("page=%s → %s", async (page, expected) => {
-        await getCompanies({ page })
-        expect(mockGet).toHaveBeenCalledWith(expected)
+    it("calls /entities filtered by type=company", async () => {
+        await getCompanies({})
+        expect(mockGet).toHaveBeenCalledWith("/entities?type[]=company")
+    })
+
+    it("appends pageCursor when provided", async () => {
+        await getCompanies({ pageCursor: "cursor-1" })
+        expect(mockGet).toHaveBeenCalledWith("/entities?type[]=company&pageCursor=cursor-1")
     })
 })
 
 describe("getComponents", () => {
-    it.each([
-        [undefined, "/components"],
-        [1,         "/components"],
-        [2,         "/components?pageOffset=100"],
-        [3,         "/components?pageOffset=200"],
-    ] as [number | undefined, string][])("page=%s → %s", async (page, expected) => {
-        await getComponents({ page })
-        expect(mockGet).toHaveBeenCalledWith(expected)
+    it("calls /entities filtered by type=component", async () => {
+        await getComponents({})
+        expect(mockGet).toHaveBeenCalledWith("/entities?type[]=component")
+    })
+
+    it("appends pageCursor when provided", async () => {
+        await getComponents({ pageCursor: "cursor-1" })
+        expect(mockGet).toHaveBeenCalledWith("/entities?type[]=component&pageCursor=cursor-1")
     })
 })
 
 describe("getProducts", () => {
-    it.each([
-        [undefined, "/products"],
-        [1,         "/products"],
-        [2,         "/products?pageOffset=100"],
-        [3,         "/products?pageOffset=200"],
-    ] as [number | undefined, string][])("page=%s → %s", async (page, expected) => {
-        await getProducts({ page })
-        expect(mockGet).toHaveBeenCalledWith(expected)
+    it("calls /entities filtered by type=product", async () => {
+        await getProducts({})
+        expect(mockGet).toHaveBeenCalledWith("/entities?type[]=product")
+    })
+
+    it("appends pageCursor when provided", async () => {
+        await getProducts({ pageCursor: "cursor-1" })
+        expect(mockGet).toHaveBeenCalledWith("/entities?type[]=product&pageCursor=cursor-1")
     })
 })
 
 describe("getInitiatives", () => {
-    it.each([
-        [undefined, "/initiatives"],
-        [1,         "/initiatives"],
-        [2,         "/initiatives?pageOffset=100"],
-        [3,         "/initiatives?pageOffset=200"],
-    ] as [number | undefined, string][])("page=%s → %s", async (page, expected) => {
-        await getInitiatives({ page })
-        expect(mockGet).toHaveBeenCalledWith(expected)
+    it("calls /entities filtered by type=initiative", async () => {
+        await getInitiatives({})
+        expect(mockGet).toHaveBeenCalledWith("/entities?type[]=initiative")
+    })
+
+    it("appends pageCursor when provided", async () => {
+        await getInitiatives({ pageCursor: "cursor-1" })
+        expect(mockGet).toHaveBeenCalledWith("/entities?type[]=initiative&pageCursor=cursor-1")
     })
 })
 
 describe("getObjectives", () => {
-    it.each([
-        [undefined, "/objectives"],
-        [1,         "/objectives"],
-        [2,         "/objectives?pageOffset=100"],
-        [3,         "/objectives?pageOffset=200"],
-    ] as [number | undefined, string][])("page=%s → %s", async (page, expected) => {
-        await getObjectives({ page })
-        expect(mockGet).toHaveBeenCalledWith(expected)
+    it("calls /entities filtered by type=objective", async () => {
+        await getObjectives({})
+        expect(mockGet).toHaveBeenCalledWith("/entities?type[]=objective")
+    })
+
+    it("appends pageCursor when provided", async () => {
+        await getObjectives({ pageCursor: "cursor-1" })
+        expect(mockGet).toHaveBeenCalledWith("/entities?type[]=objective&pageCursor=cursor-1")
     })
 })
 
-// Finding #3: getFeatureStatuses pagination was never exercised beyond page 1
 describe("getFeatureStatuses", () => {
-    it.each([
-        [undefined, "/feature-statuses"],
-        [1,         "/feature-statuses"],
-        [2,         "/feature-statuses?pageOffset=100"],
-        [3,         "/feature-statuses?pageOffset=200"],
-    ] as [number | undefined, string][])("page=%s → %s", async (page, expected) => {
-        await getFeatureStatuses({ page })
-        expect(mockGet).toHaveBeenCalledWith(expected)
+    it("looks up the status field id, then lists its values for features", async () => {
+        mockGet.mockResolvedValueOnce({
+            data: {
+                fields: {
+                    "field-1": { id: "field-1", name: "Name" },
+                    "field-2": { id: "field-2", name: "Status", path: "status" },
+                },
+            },
+        })
+        mockGet.mockResolvedValueOnce({ data: [] })
+
+        await getFeatureStatuses({})
+
+        expect(mockGet).toHaveBeenNthCalledWith(1, "/entities/configurations/feature")
+        expect(mockGet).toHaveBeenNthCalledWith(
+            2,
+            "/entities/fields/field-2/values?assignedEntityType[]=feature"
+        )
+    })
+
+    it("appends pageCursor to the values lookup", async () => {
+        mockGet.mockResolvedValueOnce({
+            data: { fields: { "field-2": { id: "field-2", path: "status" } } },
+        })
+        mockGet.mockResolvedValueOnce({ data: [] })
+
+        await getFeatureStatuses({ pageCursor: "cursor-1" })
+
+        expect(mockGet).toHaveBeenNthCalledWith(
+            2,
+            "/entities/fields/field-2/values?assignedEntityType[]=feature&pageCursor=cursor-1"
+        )
+    })
+
+    it("throws when no status field is found in the configuration", async () => {
+        mockGet.mockResolvedValueOnce({ data: { fields: {} } })
+
+        await expect(getFeatureStatuses({})).rejects.toThrow(
+            "Could not find the 'status' field"
+        )
     })
 })
 
 // ---------------------------------------------------------------------------
-// getNotes — cursor pagination + filter params + validation
-// Finding #6: add last+createdTo combination test
+// getNotes — cursor pagination + filter params
 // ---------------------------------------------------------------------------
 describe("getNotes", () => {
     it("calls /notes with no params when none supplied", async () => {
@@ -138,28 +166,10 @@ describe("getNotes", () => {
     })
 
     it("appends filter params to query string", async () => {
-        await getNotes({ term: "hello", companyId: "c-1" })
+        await getNotes({ type: "textNote", ownerEmail: "a@example.com" })
         const call = mockGet.mock.calls[0][0] as string
-        expect(call).toContain("term=hello")
-        expect(call).toContain("companyId=c-1")
-    })
-
-    it("throws when last is combined with createdFrom", async () => {
-        await expect(getNotes({ last: "7d", createdFrom: "2024-01-01" })).rejects.toThrow(
-            "'last' parameter cannot be combined with 'createdFrom' or 'createdTo'"
-        )
-    })
-
-    it("throws when last is combined with createdTo", async () => {
-        await expect(getNotes({ last: "7d", createdTo: "2024-01-31" })).rejects.toThrow(
-            "'last' parameter cannot be combined with 'createdFrom' or 'createdTo'"
-        )
-    })
-
-    it("throws when anyTag and allTags are both provided", async () => {
-        await expect(getNotes({ anyTag: "a", allTags: "b" })).rejects.toThrow(
-            "'anyTag' cannot be combined with 'allTags'"
-        )
+        expect(call).toContain("type%5B%5D=textNote")
+        expect(call).toContain("owner%5Bemail%5D=a%40example.com")
     })
 })
 
@@ -167,38 +177,38 @@ describe("getNotes", () => {
 // Detail tools — correct endpoint + encodeURIComponent
 // ---------------------------------------------------------------------------
 describe("getFeatureDetail", () => {
-    it("calls /features/:id", async () => {
+    it("calls /entities/:id", async () => {
         await getFeatureDetail({ featureId: "abc-123" })
-        expect(mockGet).toHaveBeenCalledWith("/features/abc-123")
+        expect(mockGet).toHaveBeenCalledWith("/entities/abc-123")
     })
 
     it("encodes special characters in featureId", async () => {
         await getFeatureDetail({ featureId: "a/b c" })
-        expect(mockGet).toHaveBeenCalledWith("/features/a%2Fb%20c")
+        expect(mockGet).toHaveBeenCalledWith("/entities/a%2Fb%20c")
     })
 })
 
 describe("getCompanyDetail", () => {
-    it("calls /companies/:id", async () => {
+    it("calls /entities/:id", async () => {
         await getCompanyDetail({ companyId: "comp-1" })
-        expect(mockGet).toHaveBeenCalledWith("/companies/comp-1")
+        expect(mockGet).toHaveBeenCalledWith("/entities/comp-1")
     })
 
     it("encodes special characters in companyId", async () => {
         await getCompanyDetail({ companyId: "a/b" })
-        expect(mockGet).toHaveBeenCalledWith("/companies/a%2Fb")
+        expect(mockGet).toHaveBeenCalledWith("/entities/a%2Fb")
     })
 })
 
 describe("getComponentDetail", () => {
-    it("calls /components/:id", async () => {
+    it("calls /entities/:id", async () => {
         await getComponentDetail({ componentId: "cmp-99" })
-        expect(mockGet).toHaveBeenCalledWith("/components/cmp-99")
+        expect(mockGet).toHaveBeenCalledWith("/entities/cmp-99")
     })
 
     it("encodes special characters in componentId", async () => {
         await getComponentDetail({ componentId: "a/b" })
-        expect(mockGet).toHaveBeenCalledWith("/components/a%2Fb")
+        expect(mockGet).toHaveBeenCalledWith("/entities/a%2Fb")
     })
 })
 
@@ -215,55 +225,61 @@ describe("getNoteDetail", () => {
 })
 
 describe("getProductDetail", () => {
-    it("calls /products/:id", async () => {
+    it("calls /entities/:id", async () => {
         await getProductDetail({ productId: "prod-42" })
-        expect(mockGet).toHaveBeenCalledWith("/products/prod-42")
+        expect(mockGet).toHaveBeenCalledWith("/entities/prod-42")
     })
 
     it("encodes special characters in productId", async () => {
         await getProductDetail({ productId: "a/b" })
-        expect(mockGet).toHaveBeenCalledWith("/products/a%2Fb")
+        expect(mockGet).toHaveBeenCalledWith("/entities/a%2Fb")
     })
 })
 
 describe("getInitiativeDetail", () => {
-    it("calls /initiatives/:id", async () => {
+    it("calls /entities/:id", async () => {
         await getInitiativeDetail({ initiativeId: "init-5" })
-        expect(mockGet).toHaveBeenCalledWith("/initiatives/init-5")
+        expect(mockGet).toHaveBeenCalledWith("/entities/init-5")
     })
 
     it("encodes special characters in initiativeId", async () => {
         await getInitiativeDetail({ initiativeId: "a/b" })
-        expect(mockGet).toHaveBeenCalledWith("/initiatives/a%2Fb")
+        expect(mockGet).toHaveBeenCalledWith("/entities/a%2Fb")
     })
 })
 
 describe("getInitiativeFeatures", () => {
-    it("calls /initiatives/:id/features", async () => {
+    it("calls /entities/:id/relationships filtered to feature links", async () => {
         await getInitiativeFeatures({ initiativeId: "init-5" })
-        expect(mockGet).toHaveBeenCalledWith("/initiatives/init-5/features")
+        expect(mockGet).toHaveBeenCalledWith(
+            "/entities/init-5/relationships?type=link&target[type]=feature"
+        )
     })
 
-    it("paginates correctly", async () => {
-        await getInitiativeFeatures({ initiativeId: "init-5", page: 2 })
-        expect(mockGet).toHaveBeenCalledWith("/initiatives/init-5/features?pageOffset=100")
+    it("appends pageCursor when provided", async () => {
+        await getInitiativeFeatures({ initiativeId: "init-5", pageCursor: "cursor-1" })
+        expect(mockGet).toHaveBeenCalledWith(
+            "/entities/init-5/relationships?type=link&target[type]=feature&pageCursor=cursor-1"
+        )
     })
 
     it("encodes special characters in initiativeId", async () => {
         await getInitiativeFeatures({ initiativeId: "a/b" })
-        expect(mockGet).toHaveBeenCalledWith("/initiatives/a%2Fb/features")
+        expect(mockGet).toHaveBeenCalledWith(
+            "/entities/a%2Fb/relationships?type=link&target[type]=feature"
+        )
     })
 })
 
 describe("getObjectiveDetail", () => {
-    it("calls /objectives/:id", async () => {
+    it("calls /entities/:id", async () => {
         await getObjectiveDetail({ objectiveId: "obj-3" })
-        expect(mockGet).toHaveBeenCalledWith("/objectives/obj-3")
+        expect(mockGet).toHaveBeenCalledWith("/entities/obj-3")
     })
 
     it("encodes special characters in objectiveId", async () => {
         await getObjectiveDetail({ objectiveId: "a/b" })
-        expect(mockGet).toHaveBeenCalledWith("/objectives/a%2Fb")
+        expect(mockGet).toHaveBeenCalledWith("/entities/a%2Fb")
     })
 })
 

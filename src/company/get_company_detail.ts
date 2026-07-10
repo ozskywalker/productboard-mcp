@@ -21,7 +21,7 @@ interface GetCompanyDetailRequest {
 }
 
 const getCompanyDetail = async (request: GetCompanyDetailRequest): Promise<any> => {
-    const endpoint = `/companies/${encodeURIComponent(request.companyId)}`
+    const endpoint = `/entities/${encodeURIComponent(request.companyId)}`
     return productboardClient.get(endpoint)
 }
 

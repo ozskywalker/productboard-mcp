@@ -21,7 +21,7 @@ interface GetObjectiveDetailRequest {
 }
 
 const getObjectiveDetail = async (request: GetObjectiveDetailRequest): Promise<any> => {
-    const endpoint = `/objectives/${encodeURIComponent(request.objectiveId)}`
+    const endpoint = `/entities/${encodeURIComponent(request.objectiveId)}`
     return productboardClient.get(endpoint)
 }
 

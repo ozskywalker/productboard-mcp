@@ -3,26 +3,43 @@ import productboardClient from "../productboard_client.js";
 
 const getFeatureStatusesTool: Tool = {
     "name": "get_feature_statuses",
-    "description": "Returns a list of all feature statuses. This API is paginated and the page limit is always 100",
+    "description": "Returns a list of all feature statuses. This API uses cursor-based pagination",
     "inputSchema": {
         "type": "object",
         "properties": {
-            "page": {
-                "type": "number",
-                "default": 1
+            "pageCursor": {
+                "type": "string",
+                "description": "Cursor for the next page of results, taken from the previous response's links.next"
             }
         }
     }
 }
 
 interface GetFeatureStatusesRequest {
-    page?: number
+    pageCursor?: string
+}
+
+// v2 has no dedicated feature-statuses endpoint: status is a workspace-configurable
+// field, so its field id must be looked up via the feature entity configuration
+// before its allowed values can be listed.
+const findStatusFieldId = async (): Promise<string> => {
+    const configuration = await productboardClient.get("/entities/configurations/feature")
+    const fields = Object.values(configuration?.data?.fields ?? {}) as Array<{ id: string; name?: string; path?: string }>
+    const statusField = fields.find((field) => field.path === "status" || field.name?.toLowerCase() === "status")
+
+    if (!statusField) {
+        throw new Error("Could not find the 'status' field in the feature entity configuration")
+    }
+
+    return statusField.id
 }
 
 const getFeatureStatuses = async (request: GetFeatureStatusesRequest): Promise<any> => {
-    let endpoint = "/feature-statuses"
-    if (request.page && request.page > 1) {
-        endpoint += `?pageOffset=${(request.page - 1) * 100}`
+    const statusFieldId = await findStatusFieldId()
+
+    let endpoint = `/entities/fields/${encodeURIComponent(statusFieldId)}/values?assignedEntityType[]=feature`
+    if (request.pageCursor) {
+        endpoint += `&pageCursor=${encodeURIComponent(request.pageCursor)}`
     }
 
     return productboardClient.get(endpoint)
