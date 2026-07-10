@@ -7,6 +7,10 @@ This server wraps [Productboard's Public API v2](https://developer.productboard.
 - **Pagination cursors don't have to be exact.** Productboard's own docs tell you to copy the cursor "from `links.next`" — but `links.next` is a full URL, not a bare token. `pageCursor` here accepts either, so the obvious thing to do is also the correct thing to do.
 - **Sparse fieldsets.** Every list and detail tool takes an optional `fields` array (e.g. `["name", "status"]`). A caller that wants three fields off a feature isn't forced to pull the full payload — features in particular carry a nested `relationships` block most callers don't need, and that adds up fast in an LLM's context window.
 - **No N+1 traps.** `get_initiative_features` can `expand` its link stubs into full feature detail in one call, instead of making you loop `get_feature_detail` per ID. Expansion runs with bounded concurrency to respect Productboard's rate limit, and a feature that fails to resolve comes back as `{ id, type, error }` rather than failing the whole batch.
+- **Marked safe to call.** Every tool tells the client up front that it's read-only, so nothing here should trigger the "this might do something risky" confirmation some clients show before running a tool.
+- **Failures are flagged as failures.** A failed call comes back tagged as an error, not as a normal-looking response with an error message the caller has to notice on their own.
+- **Hiccups are handled for you.** A brief rate limit or server error from Productboard is retried automatically, instead of surfacing as a failure the calling model has to notice and retry itself.
+- **Structured, not just text.** Responses come back in a structured form alongside the usual text, which suits clients — including OpenAI-based ones — that consume tool output programmatically rather than by re-parsing text.
 
 It's also strictly read-only — 16 tools, all GET, no write or delete surface at all — and already migrated to API v2; v1 was sunset 2026-07-08.
 

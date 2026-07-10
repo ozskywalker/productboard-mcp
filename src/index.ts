@@ -23,6 +23,13 @@ import { getInitiativeFeaturesTool, GetInitiativeFeaturesRequest, getInitiativeF
 import { getObjectivesTool, GetObjectivesRequest, getObjectives } from "./objective/get_objectives.js";
 import { getObjectiveDetailTool, GetObjectiveDetailRequest, getObjectiveDetail } from "./objective/get_objective_detail.js";
 
+function toolResult(result: unknown) {
+    return {
+        content: [{ type: "text" as const, text: JSON.stringify(result) }],
+        structuredContent: result as Record<string, unknown>,
+    }
+}
+
 async function main() {
     const productboardAccessToken = process.env.PRODUCTBOARD_ACCESS_TOKEN
 
@@ -55,129 +62,97 @@ async function main() {
                     case getProductsTool.name: {
                         const request = args as unknown as GetProductsRequest;
                         const result = await getProducts(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getProductDetailTool.name: {
                         const request = args as unknown as GetProductDetailRequest;
                         const result = await getProductDetail(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getFeaturesTool.name: {
                         const request = args as unknown as GetFeaturesRequest;
                         const result = await getFeatures(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getFeatureDetailTool.name: {
                         const request = args as unknown as GetFeatureDetailRequest;
                         const result = await getFeatureDetail(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getComponentsTool.name: {
                         const request = args as unknown as GetComponentsRequest;
                         const result = await getComponents(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getComponentDetailTool.name: {
                         const request = args as unknown as GetComponentDetailRequest;
                         const result = await getComponentDetail(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getFeatureStatusesTool.name: {
                         const request = args as unknown as GetFeatureStatusesRequest;
                         const result = await getFeatureStatuses(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getNotesTool.name: {
                         const request = args as unknown as GetNotesRequest;
                         const result = await getNotes(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getNoteDetailTool.name: {
                         const request = args as unknown as GetNoteDetailRequest;
                         const result = await getNoteDetail(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getCompaniesTool.name: {
                         const request = args as unknown as GetCompaniesRequest;
                         const result = await getCompanies(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getCompanyDetailTool.name: {
                         const request = args as unknown as GetCompanyDetailRequest;
                         const result = await getCompanyDetail(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getInitiativesTool.name: {
                         const request = args as unknown as GetInitiativesRequest;
                         const result = await getInitiatives(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getInitiativeDetailTool.name: {
                         const request = args as unknown as GetInitiativeDetailRequest;
                         const result = await getInitiativeDetail(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getInitiativeFeaturesTool.name: {
                         const request = args as unknown as GetInitiativeFeaturesRequest;
                         const result = await getInitiativeFeatures(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getObjectivesTool.name: {
                         const request = args as unknown as GetObjectivesRequest;
                         const result = await getObjectives(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     case getObjectiveDetailTool.name: {
                         const request = args as unknown as GetObjectiveDetailRequest;
                         const result = await getObjectiveDetail(request);
-                        return {
-                            content: [{ type: "text", text: JSON.stringify(result) }],
-                        }
+                        return toolResult(result);
                     }
 
                     default:

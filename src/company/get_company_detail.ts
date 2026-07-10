@@ -2,6 +2,7 @@ import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
 import { fieldsQueryString } from "../fields.js";
 import { readOnlyAnnotations } from "../tool_annotations.js";
+import { detailEnvelopeOutputSchema } from "../output_schemas.js";
 
 const getCompanyDetailTool: Tool = {
     "name": "get_company_detail",
@@ -21,6 +22,7 @@ const getCompanyDetailTool: Tool = {
         },
         "required": ["companyId"]
     },
+    "outputSchema": detailEnvelopeOutputSchema,
     "annotations": readOnlyAnnotations("Get Company Detail")
 }
 

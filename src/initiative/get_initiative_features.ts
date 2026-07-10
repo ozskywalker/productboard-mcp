@@ -3,6 +3,7 @@ import productboardClient from "../productboard_client.js";
 import { resolvePageCursor } from "../pagination.js";
 import { fieldsQueryString } from "../fields.js";
 import { readOnlyAnnotations } from "../tool_annotations.js";
+import { listEnvelopeOutputSchema } from "../output_schemas.js";
 
 const getInitiativeFeaturesTool: Tool = {
     "name": "get_initiative_features",
@@ -30,6 +31,7 @@ const getInitiativeFeaturesTool: Tool = {
         },
         "required": ["initiativeId"]
     },
+    "outputSchema": listEnvelopeOutputSchema,
     "annotations": readOnlyAnnotations("Get Initiative Features")
 }
 

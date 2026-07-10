@@ -138,6 +138,7 @@ beforeAll(async () => {
 function callTool(name: string, args: Record<string, unknown> = {}) {
     return handlers["__CALL__"]({ params: { name, arguments: args } }) as Promise<{
         content: Array<{ type: string; text: string }>
+        structuredContent?: Record<string, unknown>
         isError?: boolean
     }>
 }
@@ -180,6 +181,7 @@ describe("CallToolRequest routing", () => {
         // Response should contain the serialised mock return value
         expect(JSON.parse(result.content[0].text)).toMatchObject({ data: expect.anything() })
         expect(result.isError).toBeUndefined()
+        expect(result.structuredContent).toEqual(JSON.parse(result.content[0].text))
     })
 
     // Finding #4 — error paths through the catch block
@@ -191,6 +193,7 @@ describe("CallToolRequest routing", () => {
         const body = JSON.parse(result.content[0].text)
         expect(body.error).toBe("API is down")
         expect(result.isError).toBe(true)
+        expect(result.structuredContent).toBeUndefined()
     })
 
     it("returns { error } content for an unknown tool name", async () => {
@@ -199,6 +202,7 @@ describe("CallToolRequest routing", () => {
         const body = JSON.parse(result.content[0].text)
         expect(body.error).toMatch(/Unknown tool/)
         expect(result.isError).toBe(true)
+        expect(result.structuredContent).toBeUndefined()
     })
 })
 

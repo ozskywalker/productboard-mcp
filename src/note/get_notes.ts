@@ -3,6 +3,7 @@ import productboardClient from "../productboard_client.js";
 import { resolvePageCursor } from "../pagination.js";
 import { appendFields } from "../fields.js";
 import { readOnlyAnnotations } from "../tool_annotations.js";
+import { listEnvelopeOutputSchema } from "../output_schemas.js";
 
 const getNotesTool: Tool = {
     "name": "get_notes",
@@ -70,6 +71,7 @@ const getNotesTool: Tool = {
             }
         }
     },
+    "outputSchema": listEnvelopeOutputSchema,
     "annotations": readOnlyAnnotations("Get Notes")
 }
 

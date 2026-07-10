@@ -6,6 +6,7 @@ vi.mock("../productboard_client.js", () => ({
 }))
 
 import { Tool } from "@modelcontextprotocol/sdk/types.js"
+import { listEnvelopeOutputSchema, detailEnvelopeOutputSchema } from "../output_schemas.js"
 
 import { getProductsTool } from "../product/get_products.js"
 import { getProductDetailTool } from "../product/get_product_detail.js"
@@ -63,6 +64,22 @@ describe("tool metadata completeness", () => {
                 openWorldHint: true,
             })
             expect(tool.annotations?.title).toBeTruthy()
+        }
+    )
+})
+
+describe("output schema classification", () => {
+    it.each(LIST_TOOLS.map((tool) => [tool.name, tool] as const))(
+        "%s uses the shared list envelope schema",
+        (_name, tool) => {
+            expect(tool.outputSchema).toBe(listEnvelopeOutputSchema)
+        }
+    )
+
+    it.each(DETAIL_TOOLS.map((tool) => [tool.name, tool] as const))(
+        "%s uses the shared detail envelope schema",
+        (_name, tool) => {
+            expect(tool.outputSchema).toBe(detailEnvelopeOutputSchema)
         }
     )
 })

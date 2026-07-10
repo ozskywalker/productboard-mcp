@@ -3,6 +3,7 @@ import productboardClient from "../productboard_client.js";
 import { resolvePageCursor } from "../pagination.js";
 import { fieldsQueryString } from "../fields.js";
 import { readOnlyAnnotations } from "../tool_annotations.js";
+import { listEnvelopeOutputSchema } from "../output_schemas.js";
 
 const getProductsTool: Tool = {
     "name": "get_products",
@@ -21,6 +22,7 @@ const getProductsTool: Tool = {
             }
         }
     },
+    "outputSchema": listEnvelopeOutputSchema,
     "annotations": readOnlyAnnotations("Get Products")
 }
 
