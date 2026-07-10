@@ -1,5 +1,6 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
+import { resolvePageCursor } from "../pagination.js";
 
 const getFeatureStatusesTool: Tool = {
     "name": "get_feature_statuses",
@@ -9,7 +10,7 @@ const getFeatureStatusesTool: Tool = {
         "properties": {
             "pageCursor": {
                 "type": "string",
-                "description": "Cursor for the next page of results, taken from the previous response's links.next"
+                "description": "Cursor for the next page of results — pass either the bare cursor token or the full links.next URL from the previous response"
             }
         }
     }
@@ -38,8 +39,9 @@ const getFeatureStatuses = async (request: GetFeatureStatusesRequest): Promise<a
     const statusFieldId = await findStatusFieldId()
 
     let endpoint = `/entities/fields/${encodeURIComponent(statusFieldId)}/values?assignedEntityType[]=feature`
-    if (request.pageCursor) {
-        endpoint += `&pageCursor=${encodeURIComponent(request.pageCursor)}`
+    const pageCursor = resolvePageCursor(request.pageCursor)
+    if (pageCursor) {
+        endpoint += `&pageCursor=${encodeURIComponent(pageCursor)}`
     }
 
     return productboardClient.get(endpoint)

@@ -1,5 +1,6 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
+import { resolvePageCursor } from "../pagination.js";
 
 const getNotesTool: Tool = {
     "name": "get_notes",
@@ -58,7 +59,7 @@ const getNotesTool: Tool = {
             },
             "pageCursor": {
                 "type": "string",
-                "description": "Cursor for the next page of results, taken from the previous response's links.next"
+                "description": "Cursor for the next page of results — pass either the bare cursor token or the full links.next URL from the previous response"
             }
         }
     }
@@ -115,8 +116,9 @@ const getNotes = async (request: GetNotesRequest): Promise<any> => {
     if (request.sourceRecordId) {
         params.append('metadata[source][recordId]', request.sourceRecordId)
     }
-    if (request.pageCursor) {
-        params.append('pageCursor', request.pageCursor)
+    const pageCursor = resolvePageCursor(request.pageCursor)
+    if (pageCursor) {
+        params.append('pageCursor', pageCursor)
     }
 
     const queryString = params.toString()

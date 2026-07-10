@@ -1,5 +1,6 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
+import { resolvePageCursor } from "../pagination.js";
 
 const getInitiativeFeaturesTool: Tool = {
     "name": "get_initiative_features",
@@ -13,7 +14,7 @@ const getInitiativeFeaturesTool: Tool = {
             },
             "pageCursor": {
                 "type": "string",
-                "description": "Cursor for the next page of results, taken from the previous response's links.next"
+                "description": "Cursor for the next page of results — pass either the bare cursor token or the full links.next URL from the previous response"
             }
         },
         "required": ["initiativeId"]
@@ -27,8 +28,9 @@ interface GetInitiativeFeaturesRequest {
 
 const getInitiativeFeatures = async (request: GetInitiativeFeaturesRequest): Promise<any> => {
     let endpoint = `/entities/${encodeURIComponent(request.initiativeId)}/relationships?type=link&target[type]=feature`
-    if (request.pageCursor) {
-        endpoint += `&pageCursor=${encodeURIComponent(request.pageCursor)}`
+    const pageCursor = resolvePageCursor(request.pageCursor)
+    if (pageCursor) {
+        endpoint += `&pageCursor=${encodeURIComponent(pageCursor)}`
     }
 
     return productboardClient.get(endpoint)
