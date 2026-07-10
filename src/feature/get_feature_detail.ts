@@ -1,6 +1,7 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
 import { fieldsQueryString } from "../fields.js";
+import { readOnlyAnnotations } from "../tool_annotations.js";
 
 const getFeatureDetailTool: Tool = {
     "name": "get_feature_detail",
@@ -19,7 +20,8 @@ const getFeatureDetailTool: Tool = {
             }
         },
         "required": ["featureId"]
-    }
+    },
+    "annotations": readOnlyAnnotations("Get Feature Detail")
 }
 
 interface GetFeatureDetailRequest {

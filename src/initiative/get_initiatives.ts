@@ -2,6 +2,7 @@ import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
 import { resolvePageCursor } from "../pagination.js";
 import { fieldsQueryString } from "../fields.js";
+import { readOnlyAnnotations } from "../tool_annotations.js";
 
 const getInitiativesTool: Tool = {
     "name": "get_initiatives",
@@ -19,7 +20,8 @@ const getInitiativesTool: Tool = {
                 "description": "Cursor for the next page of results — pass either the bare cursor token or the full links.next URL from the previous response"
             }
         }
-    }
+    },
+    "annotations": readOnlyAnnotations("Get Initiatives")
 }
 
 interface GetInitiativesRequest {

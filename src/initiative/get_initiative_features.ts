@@ -2,6 +2,7 @@ import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
 import { resolvePageCursor } from "../pagination.js";
 import { fieldsQueryString } from "../fields.js";
+import { readOnlyAnnotations } from "../tool_annotations.js";
 
 const getInitiativeFeaturesTool: Tool = {
     "name": "get_initiative_features",
@@ -28,7 +29,8 @@ const getInitiativeFeaturesTool: Tool = {
             }
         },
         "required": ["initiativeId"]
-    }
+    },
+    "annotations": readOnlyAnnotations("Get Initiative Features")
 }
 
 interface GetInitiativeFeaturesRequest {

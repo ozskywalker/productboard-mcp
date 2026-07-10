@@ -2,6 +2,7 @@ import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
 import { resolvePageCursor } from "../pagination.js";
 import { appendFields } from "../fields.js";
+import { readOnlyAnnotations } from "../tool_annotations.js";
 
 const getNotesTool: Tool = {
     "name": "get_notes",
@@ -68,7 +69,8 @@ const getNotesTool: Tool = {
                 "description": "Cursor for the next page of results — pass either the bare cursor token or the full links.next URL from the previous response"
             }
         }
-    }
+    },
+    "annotations": readOnlyAnnotations("Get Notes")
 }
 
 interface GetNotesRequest {

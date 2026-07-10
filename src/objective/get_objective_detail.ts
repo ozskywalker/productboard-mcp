@@ -1,6 +1,7 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
 import { fieldsQueryString } from "../fields.js";
+import { readOnlyAnnotations } from "../tool_annotations.js";
 
 const getObjectiveDetailTool: Tool = {
     "name": "get_objective_detail",
@@ -19,7 +20,8 @@ const getObjectiveDetailTool: Tool = {
             }
         },
         "required": ["objectiveId"]
-    }
+    },
+    "annotations": readOnlyAnnotations("Get Objective Detail")
 }
 
 interface GetObjectiveDetailRequest {

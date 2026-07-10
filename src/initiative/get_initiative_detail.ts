@@ -1,6 +1,7 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
 import { fieldsQueryString } from "../fields.js";
+import { readOnlyAnnotations } from "../tool_annotations.js";
 
 const getInitiativeDetailTool: Tool = {
     "name": "get_initiative_detail",
@@ -19,7 +20,8 @@ const getInitiativeDetailTool: Tool = {
             }
         },
         "required": ["initiativeId"]
-    }
+    },
+    "annotations": readOnlyAnnotations("Get Initiative Detail")
 }
 
 interface GetInitiativeDetailRequest {

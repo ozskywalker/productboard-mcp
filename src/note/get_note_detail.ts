@@ -1,6 +1,7 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
 import { fieldsQueryString } from "../fields.js";
+import { readOnlyAnnotations } from "../tool_annotations.js";
 
 const getNoteDetailTool: Tool = {
     "name": "get_note_detail",
@@ -19,7 +20,8 @@ const getNoteDetailTool: Tool = {
             }
         },
         "required": ["noteId"]
-    }
+    },
+    "annotations": readOnlyAnnotations("Get Note Detail")
 }
 
 interface GetNoteDetailRequest {

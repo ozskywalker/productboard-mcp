@@ -1,6 +1,7 @@
 import { Tool } from "@modelcontextprotocol/sdk/types.js";
 import productboardClient from "../productboard_client.js";
 import { fieldsQueryString } from "../fields.js";
+import { readOnlyAnnotations } from "../tool_annotations.js";
 
 const getComponentDetailTool: Tool = {
     "name": "get_component_detail",
@@ -19,7 +20,8 @@ const getComponentDetailTool: Tool = {
             }
         },
         "required": ["componentId"]
-    }
+    },
+    "annotations": readOnlyAnnotations("Get Component Detail")
 }
 
 interface GetComponentDetailRequest {
