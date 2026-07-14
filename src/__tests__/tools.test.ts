@@ -17,6 +17,7 @@ import { getComponents } from "../component/get_components.js"
 import { getComponentDetail, getComponentDetailTool } from "../component/get_component_detail.js"
 import { getNotes } from "../note/get_notes.js"
 import { getNoteDetail, getNoteDetailTool } from "../note/get_note_detail.js"
+import { getNoteRelationships, getNoteRelationshipsTool } from "../note/get_note_relationships.js"
 import { getProducts } from "../product/get_products.js"
 import { getProductDetail, getProductDetailTool } from "../product/get_product_detail.js"
 import { getFeatureStatuses } from "../feature_status/get_feature_statuses.js"
@@ -189,6 +190,105 @@ describe("getNotes", () => {
     it("appends fields[] when provided", async () => {
         await getNotes({ fields: ["name", "tags"] })
         expect(mockGet).toHaveBeenCalledWith("/notes?fields%5B%5D=name&fields%5B%5D=tags")
+    })
+})
+
+// ---------------------------------------------------------------------------
+// getNoteRelationships — per-note relationships lookup + optional expand
+// ---------------------------------------------------------------------------
+describe("getNoteRelationships", () => {
+    it("calls /notes/:id/relationships with no params when none supplied", async () => {
+        await getNoteRelationships({ noteId: "n1" })
+        expect(mockGet).toHaveBeenCalledWith("/notes/n1/relationships")
+    })
+
+    it("appends type, targetType, targetId, limit, and pageCursor to the query string", async () => {
+        await getNoteRelationships({
+            noteId: "n1",
+            type: "customer",
+            targetType: "company",
+            targetId: "cmp-1",
+            limit: 25,
+            pageCursor: "cursor-1",
+        })
+        const call = mockGet.mock.calls[0][0] as string
+        expect(call).toContain("/notes/n1/relationships?")
+        expect(call).toContain("type=customer")
+        expect(call).toContain("target%5Btype%5D=company")
+        expect(call).toContain("target%5Bid%5D=cmp-1")
+        expect(call).toContain("limit=25")
+        expect(call).toContain("pageCursor=cursor-1")
+    })
+
+    it("encodes special characters in noteId", async () => {
+        await getNoteRelationships({ noteId: "a/b" })
+        expect(mockGet).toHaveBeenCalledWith("/notes/a%2Fb/relationships")
+    })
+
+    it("expand=false (default) returns target stubs unchanged", async () => {
+        const stub = { data: [{ type: "customer", target: { id: "cmp-1", type: "company" } }], links: { next: null } }
+        mockGet.mockResolvedValueOnce(stub)
+
+        const result = await getNoteRelationships({ noteId: "n1" })
+
+        expect(mockGet).toHaveBeenCalledTimes(1)
+        expect(result).toEqual(stub)
+    })
+
+    it("expand=true resolves each relationship target into full entity detail", async () => {
+        mockGet.mockResolvedValueOnce({
+            data: [
+                { type: "link", target: { id: "f1", type: "feature" } },
+                { type: "link", target: { id: "f2", type: "feature" } },
+            ],
+            links: { next: null },
+        })
+        mockGet.mockResolvedValueOnce({ data: { id: "f1", type: "feature", fields: { name: "Foo" } } })
+        mockGet.mockResolvedValueOnce({ data: { id: "f2", type: "feature", fields: { name: "Bar" } } })
+
+        const result = await getNoteRelationships({ noteId: "n1", expand: true })
+
+        expect(mockGet).toHaveBeenNthCalledWith(1, "/notes/n1/relationships")
+        expect(mockGet).toHaveBeenNthCalledWith(2, "/entities/f1")
+        expect(mockGet).toHaveBeenNthCalledWith(3, "/entities/f2")
+        expect(result).toEqual({
+            data: [
+                { id: "f1", type: "feature", fields: { name: "Foo" } },
+                { id: "f2", type: "feature", fields: { name: "Bar" } },
+            ],
+            links: { next: null },
+        })
+    })
+
+    it("expand=true passes fields[] through to each detail lookup", async () => {
+        mockGet.mockResolvedValueOnce({
+            data: [{ type: "customer", target: { id: "cmp-1", type: "company" } }],
+            links: { next: null },
+        })
+        mockGet.mockResolvedValueOnce({ data: { id: "cmp-1" } })
+
+        await getNoteRelationships({ noteId: "n1", expand: true, fields: ["name"] })
+
+        expect(mockGet).toHaveBeenNthCalledWith(2, "/entities/cmp-1?fields[]=name")
+    })
+
+    it("expand=true returns an error stub for a target that fails to resolve, without failing the whole call", async () => {
+        mockGet.mockResolvedValueOnce({
+            data: [
+                { type: "link", target: { id: "f1", type: "feature" } },
+                { type: "link", target: { id: "f2", type: "feature" } },
+            ],
+            links: { next: null },
+        })
+        mockGet.mockResolvedValueOnce({ data: { id: "f1", type: "feature" } })
+        mockGet.mockRejectedValueOnce(new Error("Productboard API error 404: not found"))
+
+        const result = await getNoteRelationships({ noteId: "n1", expand: true })
+
+        expect(result.data).toEqual([
+            { id: "f1", type: "feature" },
+            { id: "f2", type: "feature", error: "Productboard API error 404: not found" },
+        ])
     })
 })
 
@@ -386,6 +486,7 @@ describe("tool input schemas declare required fields", () => {
         ["get_company_detail",      getCompanyDetailTool,      "companyId"],
         ["get_component_detail",    getComponentDetailTool,    "componentId"],
         ["get_note_detail",         getNoteDetailTool,         "noteId"],
+        ["get_note_relationships",  getNoteRelationshipsTool,  "noteId"],
         ["get_product_detail",      getProductDetailTool,      "productId"],
         ["get_initiative_detail",   getInitiativeDetailTool,   "initiativeId"],
         ["get_initiative_features", getInitiativeFeaturesTool, "initiativeId"],

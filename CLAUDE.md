@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-This is a Model Context Protocol (MCP) server that integrates the Productboard API into agentic workflows. The server exposes 16 read-only tools for accessing Productboard entities through a standardized MCP interface.
+This is a Model Context Protocol (MCP) server that integrates the Productboard API into agentic workflows. The server exposes 17 read-only tools for accessing Productboard entities through a standardized MCP interface.
 
 ## Common Commands
 
@@ -45,7 +45,7 @@ The `ProductboardClient` class (`src/productboard_client.ts`) provides:
 - All URL path parameters are `encodeURIComponent`-encoded before use
 
 ### v2 Entity Model
-v2 replaced the separate v1 `/products`, `/components`, `/features`, `/initiatives`, `/objectives`, and `/companies` resources with a single unified `/entities` resource, disambiguated by a `type[]` filter (e.g. `/entities?type[]=feature`). Detail lookups for all of these go through `/entities/{id}`. `get_feature_statuses` has no direct v2 equivalent — it looks up the workspace's `status` field id via `/entities/configurations/feature`, then lists that field's allowed values via `/entities/fields/{fieldId}/values`. `get_initiative_features` uses `/entities/{id}/relationships?type=link&target[type]=feature`, which returns link stubs (id/type/links) rather than full feature objects — callers should follow up with `get_feature_detail` per id. `/notes` remains a standalone resource in v2, but the v1 `term`, `featureId`, `companyId`, `anyTag`/`allTags`, and `last` filters have no v2 equivalent and were dropped.
+v2 replaced the separate v1 `/products`, `/components`, `/features`, `/initiatives`, `/objectives`, and `/companies` resources with a single unified `/entities` resource, disambiguated by a `type[]` filter (e.g. `/entities?type[]=feature`). Detail lookups for all of these go through `/entities/{id}`. `get_feature_statuses` has no direct v2 equivalent — it looks up the workspace's `status` field id via `/entities/configurations/feature`, then lists that field's allowed values via `/entities/fields/{fieldId}/values`. `get_initiative_features` uses `/entities/{id}/relationships?type=link&target[type]=feature`, which returns link stubs (id/type/links) rather than full feature objects — callers should follow up with `get_feature_detail` per id. `/notes` remains a standalone resource in v2, but the v1 `term`, `featureId`, `companyId`, `anyTag`/`allTags`, and `last` filters have no v2 equivalent and were dropped. Notes similarly expose `get_note_relationships`, which uses `/notes/{id}/relationships` (params: `type`, `target[type]`, `target[id]`, `limit`, `pageCursor`) to return a note's customer (User/Company) or link (Feature/Subfeature/Product/Component) relationships, with the same `expand` stub-resolution behavior as `get_initiative_features` — but there is still no bulk "notes by company" filter in v2: this endpoint is scoped to one note at a time, so finding all notes for a company still requires listing notes and checking each one's relationships.
 
 ### Tool Registration
 All tools are registered in `src/index.ts` in two places:
@@ -57,7 +57,7 @@ All tools are registered in `src/index.ts` in two places:
 - `get_components` / `get_component_detail` - Product components
 - `get_features` / `get_feature_detail` - Feature management
 - `get_feature_statuses` - Feature status tracking
-- `get_notes` / `get_note_detail` - Note management
+- `get_notes` / `get_note_detail` / `get_note_relationships` - Note management
 - `get_products` / `get_product_detail` - Product management
 - `get_initiatives` / `get_initiative_detail` / `get_initiative_features` - Initiative management
 - `get_objectives` / `get_objective_detail` - Objective management

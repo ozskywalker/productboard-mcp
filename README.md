@@ -12,7 +12,7 @@ This server wraps [Productboard's Public API v2](https://developer.productboard.
 - **Hiccups are handled for you.** A brief rate limit or server error from Productboard is retried automatically, instead of surfacing as a failure the calling model has to notice and retry itself.
 - **Structured, not just text.** Responses come back in a structured form alongside the usual text, which suits clients — including OpenAI-based ones — that consume tool output programmatically rather than by re-parsing text.
 
-It's also strictly read-only — 16 tools, all GET, no write or delete surface at all — and already migrated to API v2; v1 was sunset 2026-07-08.
+It's also strictly read-only — 17 tools, all GET, no write or delete surface at all — and already migrated to API v2; v1 was sunset 2026-07-08.
 
 ## Tools
 
@@ -27,6 +27,7 @@ It's also strictly read-only — 16 tools, all GET, no write or delete surface a
 | `get_feature_statuses` | List all feature statuses |
 | `get_notes` | List all notes (cursor-paginated) |
 | `get_note_detail` | Get a specific note by ID |
+| `get_note_relationships` | Get a note's customer (User/Company) and link (Feature/Subfeature/Product/Component) relationships (cursor-paginated, optionally `expand`ed into full entity detail) |
 | `get_products` | List all products (cursor-paginated) |
 | `get_product_detail` | Get a specific product by ID |
 | `get_initiatives` | List all initiatives (cursor-paginated) |
@@ -40,6 +41,7 @@ It's also strictly read-only — 16 tools, all GET, no write or delete surface a
 - `get_companies`, `get_components`, `get_features`, `get_products`, `get_initiatives`, and `get_objectives` all moved onto v2's unified `/entities` resource internally — the tool names and shapes didn't change, but there's no `page` parameter anymore (see cursor pagination above).
 - `get_initiative_features` returns link stubs (`id`/`type`/`links`) by default, since v2's relationship endpoint doesn't expand targets on its own — pass `expand: true` to get full feature objects instead (see above).
 - `get_notes` filtering is narrower in v2: the v1 `term` (full-text search), `featureId`, `companyId`, `anyTag`/`allTags`, and `last` filters have no v2 equivalent and are no longer supported.
+- `get_note_relationships` lets you check a single note's customer (User/Company) and link (Feature/Subfeature/Product/Component) relationships, and directly test against a specific `targetId` — but it is not a bulk filter. There is still no way to list "all notes for company X" in one call; you must list notes and check each one's relationships.
 
 
 ## Setup

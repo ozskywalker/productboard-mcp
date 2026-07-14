@@ -15,6 +15,7 @@ import { getComponentDetailTool, GetComponentDetailRequest, getComponentDetail }
 import { getFeatureStatusesTool, GetFeatureStatusesRequest, getFeatureStatuses } from "./feature_status/get_feature_statuses.js";
 import { getNotesTool, GetNotesRequest, getNotes } from "./note/get_notes.js";
 import { getNoteDetailTool, GetNoteDetailRequest, getNoteDetail } from "./note/get_note_detail.js";
+import { getNoteRelationshipsTool, GetNoteRelationshipsRequest, getNoteRelationships } from "./note/get_note_relationships.js";
 import { getCompaniesTool, GetCompaniesRequest, getCompanies } from "./company/get_companies.js";
 import { getCompanyDetailTool, GetCompanyDetailRequest, getCompanyDetail } from "./company/get_company_detail.js";
 import { getInitiativesTool, GetInitiativesRequest, getInitiatives } from "./initiative/get_initiatives.js";
@@ -113,6 +114,12 @@ async function main() {
                         return toolResult(result);
                     }
 
+                    case getNoteRelationshipsTool.name: {
+                        const request = args as unknown as GetNoteRelationshipsRequest;
+                        const result = await getNoteRelationships(request);
+                        return toolResult(result);
+                    }
+
                     case getCompaniesTool.name: {
                         const request = args as unknown as GetCompaniesRequest;
                         const result = await getCompanies(request);
@@ -189,6 +196,7 @@ async function main() {
                 getFeatureStatusesTool,
                 getNotesTool,
                 getNoteDetailTool,
+                getNoteRelationshipsTool,
                 getCompaniesTool,
                 getCompanyDetailTool,
                 getInitiativesTool,

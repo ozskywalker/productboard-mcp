@@ -21,6 +21,7 @@ const { handlers, mocks } = vi.hoisted(() => {
             getFeatureStatuses:   makeImpl([]),
             getNotes:             makeImpl([]),
             getNoteDetail:        makeImpl({}),
+            getNoteRelationships: makeImpl([]),
             getProducts:          makeImpl([]),
             getProductDetail:     makeImpl({}),
             getInitiatives:       makeImpl([]),
@@ -98,6 +99,10 @@ vi.mock("../note/get_note_detail.js", () => ({
     getNoteDetailTool: { name: "get_note_detail" },
     getNoteDetail: mocks.getNoteDetail,
 }))
+vi.mock("../note/get_note_relationships.js", () => ({
+    getNoteRelationshipsTool: { name: "get_note_relationships" },
+    getNoteRelationships: mocks.getNoteRelationships,
+}))
 vi.mock("../product/get_products.js", () => ({
     getProductsTool: { name: "get_products" },
     getProducts: mocks.getProducts,
@@ -161,6 +166,7 @@ const ROUTES: Array<{
     { name: "get_feature_statuses",   mockKey: "getFeatureStatuses" },
     { name: "get_notes",              mockKey: "getNotes" },
     { name: "get_note_detail",        mockKey: "getNoteDetail",       args: { noteId: "n1" } },
+    { name: "get_note_relationships", mockKey: "getNoteRelationships", args: { noteId: "n1" } },
     { name: "get_products",           mockKey: "getProducts" },
     { name: "get_product_detail",     mockKey: "getProductDetail",    args: { productId: "p1" } },
     { name: "get_initiatives",        mockKey: "getInitiatives" },
@@ -211,9 +217,9 @@ describe("CallToolRequest routing", () => {
 // Finding #1: verify the list matches what the switch can handle
 // ---------------------------------------------------------------------------
 describe("ListToolsRequest", () => {
-    it("returns exactly 16 tools", async () => {
+    it("returns exactly 17 tools", async () => {
         const result = (await handlers["__LIST__"]({})) as { tools: Array<{ name: string }> }
-        expect(result.tools).toHaveLength(16)
+        expect(result.tools).toHaveLength(17)
     })
 
     it("registers every tool that the switch can route", async () => {
